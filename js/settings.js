@@ -3,18 +3,18 @@
 const KEY = 'piano-viz-settings';
 
 const DEFAULTS = {
-  noteColor: '#4488ff',
-  speed: 300,
-  noteWidth: 12,
+  noteColor: '#00e5ff',
+  speed: 260,
+  noteWidth: 16,
   fluidEnabled: true,
-  fluidIntensity: 100,
-  fluidRadius: 2,
-  fluidSpeed: 30,
-  fluidSource: 'head',
+  fluidIntensity: 95,
+  fluidRadius: 1.2,
+  fluidSpeed: 10,
+  fluidSource: 'base',
   monophonic: false,
-  densityDissipation: 1.0,
-  velocityDissipation: 0.2,
-  curl: 30,
+  densityDissipation: 2.2,
+  velocityDissipation: 0.7,
+  curl: 46,
   showKeyboard: true,
   keyboardHeight: 80,
 };
@@ -93,6 +93,7 @@ export function bindSettingsUI (settings, onChange) {
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
+  if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
   return val;
 }
