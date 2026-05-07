@@ -44,18 +44,21 @@ export class Highway {
 
   draw (ctx, canvasHeight, keyboardHeight) {
     const base = canvasHeight - keyboardHeight;
+    // Cap active note trails at 30 % of the visible area so holding a key
+    // doesn't fill the entire screen; released trails keep their real height.
+    const maxActiveH = base * 0.30;
 
     // Draw finished (released) trails
-    for (const t of this._finished) this._drawTrail(ctx, t, base);
+    for (const t of this._finished) this._drawTrail(ctx, t, base, maxActiveH);
     // Draw active (held) trails on top
-    for (const t of this._trails.values()) this._drawTrail(ctx, t, base);
+    for (const t of this._trails.values()) this._drawTrail(ctx, t, base, maxActiveH);
   }
 
-  _drawTrail (ctx, t, base) {
-    const h = t.topY - (t.released ? t.bottomY : 0);
+  _drawTrail (ctx, t, base, maxActiveH) {
+    const visBottom = t.released ? t.bottomY : Math.max(0, t.topY - maxActiveH);
+    const h = t.topY - visBottom;
     if (h <= 0) return;
-    const yBottom = t.released ? base - t.bottomY : base;
-    const yTop    = base - t.topY;
+    const yTop = base - t.topY;
 
     // Glow effect: wider, semi-transparent under layer
     ctx.globalAlpha = 0.25;
