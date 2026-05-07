@@ -57,7 +57,7 @@ export function noteAtPoint (x, y, canvasWidth, keyboardHeight) {
   }
 
   const whiteIndex = Math.min(TOTAL_WHITES - 1, Math.max(0, Math.floor(x / ww)));
-  return WHITE_NOTES[whiteIndex] ?? null;
+  return WHITE_NOTES[whiteIndex];
 }
 
 export function drawKeyboard (ctx, activeNotes, keyboardHeight, colorMap) {

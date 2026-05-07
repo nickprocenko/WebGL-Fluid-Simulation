@@ -119,7 +119,9 @@ function releasePointerNote (pointerId) {
   const oldNote = pointerToNote.get(pointerId);
   if (oldNote == null) return;
   pointerToNote.delete(pointerId);
-  const count = (noteTouchCount.get(oldNote) || 0) - 1;
+  const currentCount = noteTouchCount.get(oldNote);
+  if (currentCount == null) return;
+  const count = currentCount - 1;
   if (count <= 0) {
     noteTouchCount.delete(oldNote);
     handleNoteOff(oldNote);
@@ -134,7 +136,7 @@ function setPointerNote (pointerId, note) {
   releasePointerNote(pointerId);
   if (note == null) return;
   pointerToNote.set(pointerId, note);
-  const count = noteTouchCount.get(note) || 0;
+  const count = noteTouchCount.get(note) ?? 0;
   if (count === 0) handleNoteOn(note, 100);
   noteTouchCount.set(note, count + 1);
 }
