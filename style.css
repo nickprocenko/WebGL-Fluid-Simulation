@@ -45,6 +45,7 @@ html, body {
   left: 0;
   width: 100%;
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
 /* Header bar */

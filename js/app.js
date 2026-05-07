@@ -1,6 +1,6 @@
 import { FluidSimulation } from './fluid.js';
 import { MidiInput } from './midi.js';
-import { noteCenterX, noteWidth, drawKeyboard } from './piano.js';
+import { noteCenterX, noteWidth, drawKeyboard, noteAtPoint } from './piano.js';
 import { Highway } from './highway.js';
 import { Settings, bindSettingsUI } from './settings.js';
 
@@ -19,6 +19,8 @@ const midi     = new MidiInput();
 let fluid = null;
 let lastTime = performance.now();
 let noteColorMap = {}; // note -> hex color (for per-note colors in future)
+const pointerToNote = new Map();
+const noteTouchCount = new Map();
 
 // ── Resize ────────────────────────────────────────────────────────────────
 
@@ -78,24 +80,96 @@ midi.onConnect(() => {
   }
 });
 
-midi.onNoteOn((note, velocity) => {
+function handleNoteOn (note, velocity) {
   const W = fluidCanvas.width;
   const color = settings.get('noteColor');
   const nw = noteWidth(note, W) * (settings.get('noteWidth') / 12);
   const cx = noteCenterX(note, W) - nw / 2;
   noteColorMap[note] = color;
   highway.noteOn(note, velocity, cx, nw, color);
-});
+}
 
-midi.onNoteOff(note => {
+function handleNoteOff (note) {
   highway.noteOff(note);
   delete noteColorMap[note];
-});
+}
+
+midi.onNoteOn(handleNoteOn);
+midi.onNoteOff(handleNoteOff);
 
 document.getElementById('midi-btn').addEventListener('click', async () => {
   const ok = await midi.requestAccess();
   if (!ok) alert('Web MIDI not available — use keyboard (A-L keys)');
 });
+
+// ── On-screen keyboard pointer input ────────────────────────────────────────
+
+function getPointerNote (e) {
+  if (!settings.get('showKeyboard')) return null;
+  const rect = pianoCanvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return null;
+  const x = (e.clientX - rect.left) * (pianoCanvas.width / rect.width);
+  const y = (e.clientY - rect.top) * (pianoCanvas.height / rect.height);
+  return noteAtPoint(x, y, pianoCanvas.width, pianoCanvas.height);
+}
+
+function releasePointerNote (pointerId) {
+  const oldNote = pointerToNote.get(pointerId);
+  if (oldNote == null) return;
+  pointerToNote.delete(pointerId);
+  const currentCount = noteTouchCount.get(oldNote);
+  if (currentCount == null) return;
+  const count = currentCount - 1;
+  if (count <= 0) {
+    noteTouchCount.delete(oldNote);
+    handleNoteOff(oldNote);
+  } else {
+    noteTouchCount.set(oldNote, count);
+  }
+}
+
+function setPointerNote (pointerId, note) {
+  const oldNote = pointerToNote.get(pointerId);
+  if (oldNote === note) return;
+  releasePointerNote(pointerId);
+  if (note == null) return;
+  pointerToNote.set(pointerId, note);
+  const count = noteTouchCount.get(note) ?? 0;
+  if (count === 0) handleNoteOn(note, 100);
+  noteTouchCount.set(note, count + 1);
+}
+
+function releaseAllPointerNotes () {
+  for (const pointerId of [...pointerToNote.keys()]) {
+    releasePointerNote(pointerId);
+  }
+}
+
+pianoCanvas.addEventListener('pointerdown', e => {
+  const note = getPointerNote(e);
+  if (note == null) return;
+  pianoCanvas.setPointerCapture(e.pointerId);
+  setPointerNote(e.pointerId, note);
+  e.preventDefault();
+});
+
+pianoCanvas.addEventListener('pointermove', e => {
+  if (!pointerToNote.has(e.pointerId)) return;
+  setPointerNote(e.pointerId, getPointerNote(e));
+  e.preventDefault();
+});
+
+pianoCanvas.addEventListener('pointerup', e => {
+  releasePointerNote(e.pointerId);
+  e.preventDefault();
+});
+
+pianoCanvas.addEventListener('pointercancel', e => {
+  releasePointerNote(e.pointerId);
+  e.preventDefault();
+});
+
+window.addEventListener('blur', releaseAllPointerNotes);
 
 // ── Settings UI ───────────────────────────────────────────────────────────
 
@@ -109,6 +183,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 
 bindSettingsUI(settings, (key, val) => {
   if (key === 'keyboardHeight') { resize(); return; }
+  if (key === 'showKeyboard' && !val) releaseAllPointerNotes();
   if (key === 'densityDissipation' && fluid) fluid.updateConfig({ DENSITY_DISSIPATION: val });
   if (key === 'velocityDissipation' && fluid) fluid.updateConfig({ VELOCITY_DISSIPATION: val });
   if (key === 'curl' && fluid) fluid.updateConfig({ CURL: val });

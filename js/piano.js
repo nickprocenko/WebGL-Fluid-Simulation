@@ -3,6 +3,14 @@
 const IS_BLACK = [false,true,false,true,false,false,true,false,true,false,true,false];
 const FIRST_NOTE = 21;
 const LAST_NOTE  = 108;
+const WHITE_NOTES = (() => {
+  const whites = [];
+  for (let n = FIRST_NOTE; n <= LAST_NOTE; n++) {
+    if (!isBlack(n)) whites.push(n);
+  }
+  return whites;
+})();
+const TOTAL_WHITES = WHITE_NOTES.length;
 
 function isBlack (note) { return IS_BLACK[note % 12]; }
 
@@ -13,12 +21,6 @@ function countWhitesBefore (note) {
   }
   return count;
 }
-
-const TOTAL_WHITES = (() => {
-  let c = 0;
-  for (let n = FIRST_NOTE; n <= LAST_NOTE; n++) if (!isBlack(n)) c++;
-  return c;
-})();
 
 export function noteToX (note, canvasWidth) {
   if (isBlack(note)) {
@@ -37,6 +39,25 @@ export function noteWidth (note, canvasWidth) {
 
 export function noteCenterX (note, canvasWidth) {
   return noteToX(note, canvasWidth) + noteWidth(note, canvasWidth) / 2;
+}
+
+export function noteAtPoint (x, y, canvasWidth, keyboardHeight) {
+  if (x < 0 || x > canvasWidth || y < 0 || y > keyboardHeight) return null;
+  const ww = canvasWidth / TOTAL_WHITES;
+  const bh = keyboardHeight * 0.62;
+
+  // Black keys sit visually on top, so test them first in their vertical area.
+  if (y <= bh) {
+    for (let n = FIRST_NOTE; n <= LAST_NOTE; n++) {
+      if (!isBlack(n)) continue;
+      const bx = noteToX(n, canvasWidth);
+      const bw = ww * 0.58;
+      if (x >= bx && x <= bx + bw) return n;
+    }
+  }
+
+  const whiteIndex = Math.min(TOTAL_WHITES - 1, Math.max(0, Math.floor(x / ww)));
+  return WHITE_NOTES[whiteIndex];
 }
 
 export function drawKeyboard (ctx, activeNotes, keyboardHeight, colorMap) {
