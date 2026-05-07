@@ -86,6 +86,7 @@ export function bindSettingsUI (settings, onChange) {
 
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
+  if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
   return val;
 }
