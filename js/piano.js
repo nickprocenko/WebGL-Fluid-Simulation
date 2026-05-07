@@ -3,7 +3,14 @@
 const IS_BLACK = [false,true,false,true,false,false,true,false,true,false,true,false];
 const FIRST_NOTE = 21;
 const LAST_NOTE  = 108;
-const WHITE_NOTES = [];
+const WHITE_NOTES = (() => {
+  const whites = [];
+  for (let n = FIRST_NOTE; n <= LAST_NOTE; n++) {
+    if (!isBlack(n)) whites.push(n);
+  }
+  return whites;
+})();
+const TOTAL_WHITES = WHITE_NOTES.length;
 
 function isBlack (note) { return IS_BLACK[note % 12]; }
 
@@ -14,17 +21,6 @@ function countWhitesBefore (note) {
   }
   return count;
 }
-
-const TOTAL_WHITES = (() => {
-  let c = 0;
-  for (let n = FIRST_NOTE; n <= LAST_NOTE; n++) {
-    if (!isBlack(n)) {
-      c++;
-      WHITE_NOTES.push(n);
-    }
-  }
-  return c;
-})();
 
 export function noteToX (note, canvasWidth) {
   if (isBlack(note)) {
