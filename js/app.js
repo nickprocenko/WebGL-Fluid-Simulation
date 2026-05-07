@@ -282,8 +282,8 @@ function frame (now) {
   if (fluid && fluidOn) {
     const color = settings.get('noteColor');
     const [r, g, b] = hexToRgb(color);
-    const fluidSpeedFactor = settings.get('fluidSpeed') / 100;
-    const velY = -(speed / H) * fluidSpeedFactor * intensity;
+    // Small constant upward bias — flow speed controls sim rate, not this.
+    const velY = -(speed / H) * 0.01 * intensity;
     const fluidRadius = settings.get('fluidRadius');
     const fluidSource = settings.get('fluidSource');
     // Multiply dye by dt so accumulation is frame-rate independent;
@@ -306,7 +306,9 @@ function frame (now) {
       }
     }
 
-    fluid.step(dt);
+    // Flow speed scales how much sim-time advances per real frame.
+    const simDt = dt * (settings.get('fluidSpeed') / 10);
+    fluid.step(simDt);
     fluid.render();
   } else if (fluid) {
     // Still step to dissipate if disabled, but clear canvas

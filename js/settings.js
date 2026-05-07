@@ -9,7 +9,7 @@ const DEFAULTS = {
   fluidEnabled: true,
   fluidIntensity: 95,
   fluidRadius: 1.2,
-  fluidSpeed: 1,
+  fluidSpeed: 10,
   fluidSource: 'base',
   monophonic: false,
   densityDissipation: 2.2,
@@ -93,6 +93,7 @@ export function bindSettingsUI (settings, onChange) {
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
+  if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
   return val;
 }
