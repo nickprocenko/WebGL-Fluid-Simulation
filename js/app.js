@@ -19,6 +19,9 @@ const midi     = new MidiInput();
 
 let fluid = null;
 let lastTime = performance.now();
+let simAccumulator = 0;
+const SIM_FIXED_DT  = 1 / 60; // physics step size — never changes, preserves eddy character
+const SIM_MAX_STEPS = 8;       // safety cap per real frame
 let noteColorMap = {}; // note -> hex color (for per-note colors in future)
 const pointerToNote = new Map();
 const noteTouchCount = new Map();
@@ -278,37 +281,40 @@ function frame (now) {
   const fluidOn   = settings.get('fluidEnabled');
   const intensity = settings.get('fluidIntensity') / 100;
 
-  // — Fluid splats from active note heads —
+  // — Fluid splats + fixed-timestep sim —
   if (fluid && fluidOn) {
     const color = settings.get('noteColor');
     const [r, g, b] = hexToRgb(color);
-    // Small constant upward bias — flow speed controls sim rate, not this.
-    const velY = -(speed / H) * 0.01 * intensity;
+    const velY       = -(speed / H) * 0.01 * intensity;
     const fluidRadius = settings.get('fluidRadius');
     const fluidSource = settings.get('fluidSource');
-    // Multiply dye by dt so accumulation is frame-rate independent;
-    // equilibrium density = intensity (not 60× intensity at 60 fps).
-    const dr = r * intensity * dt;
-    const dg = g * intensity * dt;
-    const db = b * intensity * dt;
+    // Dye scaled by fixed step size so per-step injection is always the same
+    // regardless of real frame rate or speed multiplier.
+    const dr = r * intensity * SIM_FIXED_DT;
+    const dg = g * intensity * SIM_FIXED_DT;
+    const db = b * intensity * SIM_FIXED_DT;
 
-    for (const t of highway.activeTrails()) {
-      const normX = (t.x + t.width / 2) / W;
-      const radius = Math.max(0.005, (t.width / W) * fluidRadius);
+    // Flow speed multiplier advances the accumulator; physics always uses
+    // SIM_FIXED_DT so eddy character is identical at any speed setting.
+    simAccumulator += dt * (settings.get('fluidSpeed') / 10);
 
-      if (fluidSource === 'head' || fluidSource === 'both') {
-        const normY = ((H - kh) - t.topY) / H;
-        fluid.addSplat(normX, normY, 0, velY, dr, dg, db, radius);
+    let steps = 0;
+    while (simAccumulator >= SIM_FIXED_DT && steps < SIM_MAX_STEPS) {
+      for (const t of highway.activeTrails()) {
+        const normX  = (t.x + t.width / 2) / W;
+        const radius = Math.max(0.005, (t.width / W) * fluidRadius);
+        if (fluidSource === 'head' || fluidSource === 'both') {
+          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, velY, dr, dg, db, radius);
+        }
+        if (fluidSource === 'base' || fluidSource === 'both') {
+          fluid.addSplat(normX, (H - kh) / H, 0, velY, dr, dg, db, radius);
+        }
       }
-      if (fluidSource === 'base' || fluidSource === 'both') {
-        const baseNormY = (H - kh) / H;
-        fluid.addSplat(normX, baseNormY, 0, velY, dr, dg, db, radius);
-      }
+      fluid.step(SIM_FIXED_DT);
+      simAccumulator -= SIM_FIXED_DT;
+      steps++;
     }
 
-    // Flow speed scales how much sim-time advances per real frame.
-    const simDt = dt * (settings.get('fluidSpeed') / 10);
-    fluid.step(simDt);
     fluid.render();
   } else if (fluid) {
     // Still step to dissipate if disabled, but clear canvas
