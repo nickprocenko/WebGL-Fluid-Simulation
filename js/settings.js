@@ -9,6 +9,9 @@ const DEFAULTS = {
   fluidEnabled: true,
   fluidIntensity: 100,
   fluidRadius: 2,
+  fluidSpeed: 30,
+  fluidSource: 'head',
+  monophonic: false,
   densityDissipation: 1.0,
   velocityDissipation: 0.2,
   curl: 30,
@@ -77,6 +80,9 @@ export function bindSettingsUI (settings, onChange) {
   wire('fluid-enabled',         'fluidEnabled');
   wire('fluid-intensity',       'fluidIntensity',     v => Number(v));
   wire('fluid-radius',          'fluidRadius',        v => Number(v));
+  wire('fluid-speed',           'fluidSpeed',         v => Number(v));
+  wire('fluid-source',          'fluidSource');
+  wire('monophonic',            'monophonic');
   wire('density-dissipation',   'densityDissipation', v => Number(v) / 10);
   wire('velocity-dissipation',  'velocityDissipation',v => Number(v) / 10);
   wire('curl',                  'curl',               v => Number(v));

@@ -84,6 +84,11 @@ midi.onConnect(() => {
 });
 
 function handleNoteOn (note, velocity) {
+  if (settings.get('monophonic')) {
+    for (const t of highway.activeTrails()) {
+      if (t.note !== note) handleNoteOff(t.note);
+    }
+  }
   const W = fluidCanvas.width;
   const color = settings.get('noteColor');
   const nw = noteWidth(note, W) * (settings.get('noteWidth') / 12);
@@ -277,16 +282,30 @@ function frame (now) {
   if (fluid && fluidOn) {
     const color = settings.get('noteColor');
     const [r, g, b] = hexToRgb(color);
-    const velY = -(speed / H) * 0.30 * intensity;
-
+    const fluidSpeedFactor = settings.get('fluidSpeed') / 100;
+    const velY = -(speed / H) * fluidSpeedFactor * intensity;
     const fluidRadius = settings.get('fluidRadius');
+    const fluidSource = settings.get('fluidSource');
+    // Multiply dye by dt so accumulation is frame-rate independent;
+    // equilibrium density = intensity (not 60× intensity at 60 fps).
+    const dr = r * intensity * dt;
+    const dg = g * intensity * dt;
+    const db = b * intensity * dt;
+
     for (const t of highway.activeTrails()) {
-      const normX  = (t.x + t.width / 2) / W;
-      // Canvas Y of note head (px from top); convert to canvas-normalised 0=top,1=bottom
-      // so addSplat's inversion (texY = 1 - normY) maps it to WebGL coords correctly.
-      const normY  = ((H - kh) - t.topY) / H;
-      const radius = Math.max(0.03, (t.width / W) * fluidRadius);
-      fluid.addSplat(normX, normY, 0, velY, r * intensity, g * intensity, b * intensity, radius);
+      const normX = (t.x + t.width / 2) / W;
+      const radius = Math.max(0.005, (t.width / W) * fluidRadius);
+
+      if (fluidSource === 'head' || fluidSource === 'both') {
+        // Canvas-normalised Y (0=top,1=bottom) — addSplat inverts to WebGL UV.
+        const normY = ((H - kh) - t.topY) / H;
+        fluid.addSplat(normX, normY, 0, velY, dr, dg, db, radius);
+      }
+      if (fluidSource === 'base' || fluidSource === 'both') {
+        // Fixed at the keyboard top edge.
+        const baseNormY = (H - kh) / H;
+        fluid.addSplat(normX, baseNormY, 0, velY, dr, dg, db, radius);
+      }
     }
 
     fluid.step(dt);
