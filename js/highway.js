@@ -20,7 +20,7 @@ export class Highway {
     const trail = this._trails.get(note);
     if (!trail) return;
     trail.released = true;
-    trail.bottomY = trail.topY; // freeze bottom
+    // bottomY stays at 0 (keyboard) so the full bar scrolls off cleanly
     this._finished.push(trail);
     this._trails.delete(note);
   }
@@ -34,11 +34,11 @@ export class Highway {
       t.topY = Math.min(t.topY + dy, limit);
     }
 
-    // Scroll finished trails upward and prune when fully off screen
+    // Scroll finished trails upward and prune once the tail leaves the screen
     this._finished = this._finished.filter(t => {
-      t.topY    = Math.min(t.topY    + dy, limit);
-      t.bottomY = Math.min(t.bottomY + dy, limit);
-      return t.bottomY < limit; // keep while any part is visible
+      t.topY    += dy;
+      t.bottomY += dy;
+      return t.bottomY < limit;
     });
   }
 
