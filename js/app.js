@@ -96,7 +96,7 @@ function handleNoteOn (note, velocity) {
 function handleNoteOff (note) {
   highway.noteOff(note);
   delete noteColorMap[note];
-  if (readoutNote === note) syncNoteReadoutFromActive();
+  if (readoutNote === note) showFirstActiveNote();
 }
 
 midi.onNoteOn(handleNoteOn);
@@ -135,7 +135,7 @@ function setNoteReadout (note) {
   noteReadout.classList.add('visible');
 }
 
-function syncNoteReadoutFromActive () {
+function showFirstActiveNote () {
   for (const trail of highway.activeTrails()) {
     setNoteReadout(trail.note);
     return;
@@ -179,7 +179,11 @@ pianoCanvas.addEventListener('pointerdown', e => {
   const note = getPointerNote(e);
   if (note == null) return;
   if (pianoCanvas.setPointerCapture) {
-    try { pianoCanvas.setPointerCapture(e.pointerId); } catch {}
+    try {
+      pianoCanvas.setPointerCapture(e.pointerId);
+    } catch (err) {
+      // Some mobile browsers throw here; note handling still works without capture.
+    }
   }
   setPointerNote(e.pointerId, note);
   e.preventDefault();
