@@ -8,6 +8,7 @@ const DEFAULTS = {
   noteWidth: 12,
   fluidEnabled: true,
   fluidIntensity: 100,
+  fluidRadius: 2,
   densityDissipation: 1.0,
   velocityDissipation: 0.2,
   curl: 30,
@@ -75,6 +76,7 @@ export function bindSettingsUI (settings, onChange) {
   wire('note-width',            'noteWidth',          v => Number(v));
   wire('fluid-enabled',         'fluidEnabled');
   wire('fluid-intensity',       'fluidIntensity',     v => Number(v));
+  wire('fluid-radius',          'fluidRadius',        v => Number(v));
   wire('density-dissipation',   'densityDissipation', v => Number(v) / 10);
   wire('velocity-dissipation',  'velocityDissipation',v => Number(v) / 10);
   wire('curl',                  'curl',               v => Number(v));
@@ -84,6 +86,7 @@ export function bindSettingsUI (settings, onChange) {
 
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
+  if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
   return val;
 }

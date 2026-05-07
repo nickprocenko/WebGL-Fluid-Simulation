@@ -279,12 +279,13 @@ function frame (now) {
     const [r, g, b] = hexToRgb(color);
     const velY = -(speed / H) * 0.30 * intensity;
 
+    const fluidRadius = settings.get('fluidRadius');
     for (const t of highway.activeTrails()) {
       const normX  = (t.x + t.width / 2) / W;
       // Canvas Y of note head (px from top); convert to canvas-normalised 0=top,1=bottom
       // so addSplat's inversion (texY = 1 - normY) maps it to WebGL coords correctly.
       const normY  = ((H - kh) - t.topY) / H;
-      const radius = Math.max(0.03, (t.width / W) * 5.0);
+      const radius = Math.max(0.03, (t.width / W) * fluidRadius);
       fluid.addSplat(normX, normY, 0, velY, r * intensity, g * intensity, b * intensity, radius);
     }
 
