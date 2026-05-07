@@ -104,8 +104,6 @@ document.getElementById('midi-btn').addEventListener('click', async () => {
 
 // ── On-screen keyboard pointer input ────────────────────────────────────────
 
-pianoCanvas.style.touchAction = 'manipulation';
-
 function getPointerNote (e) {
   if (!settings.get('showKeyboard')) return null;
   const rect = pianoCanvas.getBoundingClientRect();
