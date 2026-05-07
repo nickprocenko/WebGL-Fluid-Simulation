@@ -295,17 +295,14 @@ function frame (now) {
     for (const t of highway.activeTrails()) {
       const normX = (t.x + t.width / 2) / W;
       const radius = Math.max(0.005, (t.width / W) * fluidRadius);
-      // Small centering horizontal force counteracts the boundary-driven lateral
-      // drift that makes off-centre streams whip toward the nearest edge.
-      const velX = -(normX - 0.5) * 0.015;
 
       if (fluidSource === 'head' || fluidSource === 'both') {
         const normY = ((H - kh) - t.topY) / H;
-        fluid.addSplat(normX, normY, velX, velY, dr, dg, db, radius);
+        fluid.addSplat(normX, normY, 0, velY, dr, dg, db, radius);
       }
       if (fluidSource === 'base' || fluidSource === 'both') {
         const baseNormY = (H - kh) / H;
-        fluid.addSplat(normX, baseNormY, velX, velY, dr, dg, db, radius);
+        fluid.addSplat(normX, baseNormY, 0, velY, dr, dg, db, radius);
       }
     }
 
