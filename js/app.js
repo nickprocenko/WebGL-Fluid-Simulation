@@ -9,6 +9,7 @@ import { Settings, bindSettingsUI } from './settings.js';
 const fluidCanvas  = document.getElementById('fluid-canvas');
 const highwayCanvas = document.getElementById('highway-canvas');
 const pianoCanvas  = document.getElementById('piano-canvas');
+const noteReadout = document.getElementById('note-readout');
 const hCtx  = highwayCanvas.getContext('2d');
 const pCtx  = pianoCanvas.getContext('2d');
 
@@ -21,6 +22,8 @@ let lastTime = performance.now();
 let noteColorMap = {}; // note -> hex color (for per-note colors in future)
 const pointerToNote = new Map();
 const noteTouchCount = new Map();
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+let readoutNote = null;
 
 // ── Resize ────────────────────────────────────────────────────────────────
 
@@ -87,11 +90,13 @@ function handleNoteOn (note, velocity) {
   const cx = noteCenterX(note, W) - nw / 2;
   noteColorMap[note] = color;
   highway.noteOn(note, velocity, cx, nw, color);
+  setNoteReadout(note);
 }
 
 function handleNoteOff (note) {
   highway.noteOff(note);
   delete noteColorMap[note];
+  if (readoutNote === note) showFirstActiveNote();
 }
 
 midi.onNoteOn(handleNoteOn);
@@ -111,6 +116,31 @@ function getPointerNote (e) {
   const x = (e.clientX - rect.left) * (pianoCanvas.width / rect.width);
   const y = (e.clientY - rect.top) * (pianoCanvas.height / rect.height);
   return noteAtPoint(x, y, pianoCanvas.width, pianoCanvas.height);
+}
+
+function noteLabel (note) {
+  const octave = Math.floor(note / 12) - 1;
+  return `${NOTE_NAMES[note % 12]}${octave} · MIDI ${note}`;
+}
+
+function setNoteReadout (note) {
+  if (!noteReadout) return;
+  readoutNote = note;
+  if (note === null) {
+    noteReadout.textContent = '';
+    noteReadout.classList.remove('visible');
+    return;
+  }
+  noteReadout.textContent = noteLabel(note);
+  noteReadout.classList.add('visible');
+}
+
+function showFirstActiveNote () {
+  for (const trail of highway.activeTrails()) {
+    setNoteReadout(trail.note);
+    return;
+  }
+  setNoteReadout(null);
 }
 
 function releasePointerNote (pointerId) {
@@ -148,7 +178,13 @@ function releaseAllPointerNotes () {
 pianoCanvas.addEventListener('pointerdown', e => {
   const note = getPointerNote(e);
   if (note == null) return;
-  pianoCanvas.setPointerCapture(e.pointerId);
+  if (pianoCanvas.setPointerCapture) {
+    try {
+      pianoCanvas.setPointerCapture(e.pointerId);
+    } catch (err) {
+      // Some mobile browsers throw here; note handling still works without capture.
+    }
+  }
   setPointerNote(e.pointerId, note);
   e.preventDefault();
 });
@@ -168,6 +204,40 @@ pianoCanvas.addEventListener('pointercancel', e => {
   releasePointerNote(e.pointerId);
   e.preventDefault();
 });
+
+if (!window.PointerEvent) {
+  pianoCanvas.addEventListener('touchstart', e => {
+    for (const touch of e.changedTouches) {
+      const touchId = `touch-${touch.identifier}`;
+      const note = getPointerNote(touch);
+      if (note != null) setPointerNote(touchId, note);
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  pianoCanvas.addEventListener('touchmove', e => {
+    for (const touch of e.changedTouches) {
+      const touchId = `touch-${touch.identifier}`;
+      if (!pointerToNote.has(touchId)) continue;
+      setPointerNote(touchId, getPointerNote(touch));
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  pianoCanvas.addEventListener('touchend', e => {
+    for (const touch of e.changedTouches) {
+      releasePointerNote(`touch-${touch.identifier}`);
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  pianoCanvas.addEventListener('touchcancel', e => {
+    for (const touch of e.changedTouches) {
+      releasePointerNote(`touch-${touch.identifier}`);
+    }
+    e.preventDefault();
+  }, { passive: false });
+}
 
 window.addEventListener('blur', releaseAllPointerNotes);
 

@@ -45,7 +45,28 @@ html, body {
   left: 0;
   width: 100%;
   pointer-events: auto;
-  touch-action: manipulation;
+  touch-action: none;
+}
+
+#note-readout {
+  position: absolute;
+  left: 12px;
+  bottom: 88px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  color: #fff;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+#note-readout.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Header bar */
