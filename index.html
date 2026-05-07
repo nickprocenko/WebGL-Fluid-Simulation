@@ -30,17 +30,17 @@
         <h3>Appearance</h3>
         <label>
           Note color
-          <input type="color" id="note-color" value="#4488ff">
+          <input type="color" id="note-color" value="#00e5ff">
         </label>
         <label>
           Speed (px/s)
-          <input type="range" id="speed" min="50" max="800" step="10" value="300">
-          <span id="speed-val">300</span>
+          <input type="range" id="speed" min="50" max="800" step="10" value="260">
+          <span id="speed-val">260</span>
         </label>
         <label>
           Note width
-          <input type="range" id="note-width" min="4" max="32" step="1" value="12">
-          <span id="note-width-val">12</span>
+          <input type="range" id="note-width" min="4" max="32" step="1" value="16">
+          <span id="note-width-val">16</span>
         </label>
       </section>
 
@@ -51,39 +51,39 @@
         </label>
         <label>
           Intensity
-          <input type="range" id="fluid-intensity" min="0" max="200" step="5" value="100">
-          <span id="fluid-intensity-val">100%</span>
+          <input type="range" id="fluid-intensity" min="0" max="200" step="5" value="95">
+          <span id="fluid-intensity-val">95%</span>
         </label>
         <label>
           Dissipation
-          <input type="range" id="density-dissipation" min="1" max="40" step="1" value="10">
-          <span id="density-dissipation-val">1.0</span>
+          <input type="range" id="density-dissipation" min="1" max="40" step="1" value="22">
+          <span id="density-dissipation-val">2.2</span>
         </label>
         <label>
           Velocity dissipation
-          <input type="range" id="velocity-dissipation" min="1" max="40" step="1" value="2">
-          <span id="velocity-dissipation-val">0.2</span>
+          <input type="range" id="velocity-dissipation" min="1" max="40" step="1" value="7">
+          <span id="velocity-dissipation-val">0.7</span>
         </label>
         <label>
           Curl (vorticity)
-          <input type="range" id="curl" min="0" max="50" step="1" value="30">
-          <span id="curl-val">30</span>
+          <input type="range" id="curl" min="0" max="50" step="1" value="46">
+          <span id="curl-val">46</span>
         </label>
         <label>
           Splat size
-          <input type="range" id="fluid-radius" min="0.1" max="15" step="0.1" value="2">
-          <span id="fluid-radius-val">2.0</span>
+          <input type="range" id="fluid-radius" min="0.1" max="15" step="0.1" value="1.2">
+          <span id="fluid-radius-val">1.2</span>
         </label>
         <label>
           Flow speed
-          <input type="range" id="fluid-speed" min="0" max="100" step="1" value="30">
-          <span id="fluid-speed-val">30</span>
+          <input type="range" id="fluid-speed" min="0" max="100" step="1" value="1">
+          <span id="fluid-speed-val">1</span>
         </label>
         <label>
           Source
           <select id="fluid-source">
             <option value="head">Note head</option>
-            <option value="base">Piano base</option>
+            <option value="base" selected>Piano base</option>
             <option value="both">Both</option>
           </select>
         </label>
