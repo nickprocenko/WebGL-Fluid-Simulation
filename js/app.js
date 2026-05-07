@@ -126,7 +126,7 @@ function noteLabel (note) {
 function setNoteReadout (note) {
   if (!noteReadout) return;
   readoutNote = note;
-  if (note == null) {
+  if (note === null) {
     noteReadout.textContent = '';
     noteReadout.classList.remove('visible');
     return;
