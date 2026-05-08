@@ -285,7 +285,9 @@ function frame (now) {
   if (fluid && fluidOn) {
     const color = settings.get('noteColor');
     const [r, g, b] = hexToRgb(color);
-    const velY       = -(speed / H) * 0.01 * intensity;
+    // No velocity injection — injecting velY every frame accumulates in the
+    // field over time and progressively pushes dye away from the emission
+    // point (same drift bug as velX). Position accuracy > upward bias.
     const fluidRadius = settings.get('fluidRadius');
     const fluidSource = settings.get('fluidSource');
     // Dye scaled by fixed step size so per-step injection is always the same
@@ -304,10 +306,10 @@ function frame (now) {
         const normX  = (t.x + t.width / 2) / W;
         const radius = Math.max(0.005, (t.width / W) * fluidRadius);
         if (fluidSource === 'head' || fluidSource === 'both') {
-          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, velY, dr, dg, db, radius);
+          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, 0, dr, dg, db, radius);
         }
         if (fluidSource === 'base' || fluidSource === 'both') {
-          fluid.addSplat(normX, (H - kh) / H, 0, velY, dr, dg, db, radius);
+          fluid.addSplat(normX, (H - kh) / H, 0, 0, dr, dg, db, radius);
         }
       }
       fluid.step(SIM_FIXED_DT);
