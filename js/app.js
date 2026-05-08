@@ -32,8 +32,13 @@ let readoutNote = null;
 
 function resize () {
   const dpr = window.devicePixelRatio || 1;
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const vv  = window.visualViewport;
+  const W   = window.innerWidth;
+  // Use the visual viewport on mobile so the canvas matches the *visible*
+  // area, not the layout viewport (which includes the address-bar region).
+  // Mismatching this with CSS `100%` on #ui shifts the piano relative to
+  // the fluid by the address-bar height.
+  const H   = vv ? vv.height : window.innerHeight;
   const kh = settings.get('keyboardHeight');
 
   for (const c of [fluidCanvas, highwayCanvas]) {
@@ -52,6 +57,10 @@ function resize () {
 }
 
 window.addEventListener('resize', resize);
+// iOS address bar show/hide doesn't fire 'resize' — use visualViewport.
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resize);
+}
 
 // ── Fluid init ────────────────────────────────────────────────────────────
 

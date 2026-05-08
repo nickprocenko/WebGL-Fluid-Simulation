@@ -7,6 +7,7 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh; /* dynamic viewport excludes mobile address bar */
   overflow: hidden;
   background: #000;
   font-family: system-ui, sans-serif;
@@ -21,6 +22,7 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   display: block;
 }
 
@@ -34,6 +36,7 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   z-index: 3;
   pointer-events: none;
 }
