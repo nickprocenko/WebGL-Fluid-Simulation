@@ -294,16 +294,15 @@ function frame (now) {
   if (fluid && fluidOn) {
     const color = settings.get('noteColor');
     const [r, g, b] = hexToRgb(color);
-    // No velocity injection — injecting velY every frame accumulates in the
-    // field over time and progressively pushes dye away from the emission
-    // point (same drift bug as velX). Position accuracy > upward bias.
     const fluidRadius = settings.get('fluidRadius');
     const fluidSource = settings.get('fluidSource');
-    // Dye scaled by fixed step size so per-step injection is always the same
-    // regardless of real frame rate or speed multiplier.
     const dr = r * intensity * SIM_FIXED_DT;
     const dg = g * intensity * SIM_FIXED_DT;
     const db = b * intensity * SIM_FIXED_DT;
+    // Upward velocity recreates the rising-stream visual from before flow-speed
+    // was added. At this scale the steady-state reaches the vorticity clamp
+    // (~1000), matching the original dynamics. velX stays 0 to avoid lateral drift.
+    const velY = -intensity * 0.002;
 
     // Flow speed multiplier advances the accumulator; physics always uses
     // SIM_FIXED_DT so eddy character is identical at any speed setting.
@@ -315,10 +314,10 @@ function frame (now) {
         const normX  = (t.x + t.width / 2) / W;
         const radius = Math.max(0.005, (t.width / W) * fluidRadius);
         if (fluidSource === 'head' || fluidSource === 'both') {
-          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, 0, dr, dg, db, radius);
+          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, velY, dr, dg, db, radius);
         }
         if (fluidSource === 'base' || fluidSource === 'both') {
-          fluid.addSplat(normX, (H - kh) / H, 0, 0, dr, dg, db, radius);
+          fluid.addSplat(normX, (H - kh) / H, 0, velY, dr, dg, db, radius);
         }
       }
       fluid.step(SIM_FIXED_DT);
