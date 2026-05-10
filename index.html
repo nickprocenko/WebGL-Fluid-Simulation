@@ -55,6 +55,17 @@
           <span id="fluid-intensity-val">95%</span>
         </label>
         <label>
+          Fluid colour
+          <input type="color" id="fluid-color" value="#4bc0ff">
+        </label>
+        <label>
+          Colour mode
+          <select id="fluid-color-mode">
+            <option value="solid" selected>Solid</option>
+            <option value="perNote">Per-note rainbow</option>
+          </select>
+        </label>
+        <label>
           Dissipation
           <input type="range" id="density-dissipation" min="1" max="40" step="1" value="22">
           <span id="density-dissipation-val">2.2</span>
@@ -73,6 +84,11 @@
           Splat size
           <input type="range" id="fluid-radius" min="0.1" max="15" step="0.1" value="1.2">
           <span id="fluid-radius-val">1.2</span>
+        </label>
+        <label>
+          Tightness
+          <input type="range" id="fluid-tightness" min="0" max="100" step="1" value="65">
+          <span id="fluid-tightness-val">65%</span>
         </label>
         <label>
           Flow speed (×)

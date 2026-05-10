@@ -112,11 +112,14 @@ export class FluidSimulation {
   }
 
   // normX, normY in [0,1] (Y=0 top), velX/velY in normalised sim units
-  addSplat (normX, normY, velX, velY, r, g, b, radiusOverride) {
+  addSplat (normX, normY, velX, velY, r, g, b, radiusOverride, dyeRadiusOverride) {
     const { gl, config, canvas } = this;
-    const radius = radiusOverride != null
+    const velocityRadius = radiusOverride != null
       ? this._correctRadius(radiusOverride)
       : this._correctRadius(config.SPLAT_RADIUS / 100.0);
+    const dyeRadius = dyeRadiusOverride != null
+      ? this._correctRadius(dyeRadiusOverride)
+      : velocityRadius;
 
     // WebGL UV has Y=0 at bottom; invert Y
     const texY = 1.0 - normY;
@@ -126,12 +129,13 @@ export class FluidSimulation {
     gl.uniform1f(this.splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
     gl.uniform2f(this.splatProgram.uniforms.point, normX, texY);
     gl.uniform3f(this.splatProgram.uniforms.color, velX * config.SPLAT_FORCE, -velY * config.SPLAT_FORCE, 0.0);
-    gl.uniform1f(this.splatProgram.uniforms.radius, radius);
+    gl.uniform1f(this.splatProgram.uniforms.radius, velocityRadius);
     this._blit(this.velocity.write);
     this.velocity.swap();
 
     gl.uniform1i(this.splatProgram.uniforms.uTarget, this.dye.read.attach(0));
     gl.uniform3f(this.splatProgram.uniforms.color, r, g, b);
+    gl.uniform1f(this.splatProgram.uniforms.radius, dyeRadius);
     this._blit(this.dye.write);
     this.dye.swap();
   }
