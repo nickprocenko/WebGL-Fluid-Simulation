@@ -354,6 +354,9 @@ export class FluidSimulation {
       void main () {
         float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
         float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
+        float C = texture2D(uPressure, vUv).x;
+        if (vL.x < 0.0) { L = C; } if (vR.x > 1.0) { R = C; }
+        if (vT.y > 1.0) { T = C; } if (vB.y < 0.0) { B = C; }
         float divergence = texture2D(uDivergence, vUv).x;
         gl_FragColor = vec4((L + R + B + T - divergence) * 0.25, 0.0, 0.0, 1.0);
       }`);
@@ -365,6 +368,9 @@ export class FluidSimulation {
       void main () {
         float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
         float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
+        float C = texture2D(uPressure, vUv).x;
+        if (vL.x < 0.0) { L = C; } if (vR.x > 1.0) { R = C; }
+        if (vT.y > 1.0) { T = C; } if (vB.y < 0.0) { B = C; }
         vec2 velocity = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
         gl_FragColor = vec4(velocity, 0.0, 1.0);
       }`);
