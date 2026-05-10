@@ -347,6 +347,13 @@ export class FluidSimulation {
         gl_FragColor = vec4(velocity, 0.0, 1.0);
       }`);
 
+    const pressureBoundaryClamp = `
+        float C = texture2D(uPressure, vUv).x;
+        if (vL.x < 0.0) { L = C; }
+        if (vR.x > 1.0) { R = C; }
+        if (vT.y > 1.0) { T = C; }
+        if (vB.y < 0.0) { B = C; }`;
+
     const pressureShader = this._compileShader(gl.FRAGMENT_SHADER, `
       precision mediump float; precision mediump sampler2D;
       varying highp vec2 vUv; varying highp vec2 vL; varying highp vec2 vR; varying highp vec2 vT; varying highp vec2 vB;
@@ -354,9 +361,7 @@ export class FluidSimulation {
       void main () {
         float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
         float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
-        float C = texture2D(uPressure, vUv).x;
-        if (vL.x < 0.0) { L = C; } if (vR.x > 1.0) { R = C; }
-        if (vT.y > 1.0) { T = C; } if (vB.y < 0.0) { B = C; }
+${pressureBoundaryClamp}
         float divergence = texture2D(uDivergence, vUv).x;
         gl_FragColor = vec4((L + R + B + T - divergence) * 0.25, 0.0, 0.0, 1.0);
       }`);
@@ -368,9 +373,7 @@ export class FluidSimulation {
       void main () {
         float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
         float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
-        float C = texture2D(uPressure, vUv).x;
-        if (vL.x < 0.0) { L = C; } if (vR.x > 1.0) { R = C; }
-        if (vT.y > 1.0) { T = C; } if (vB.y < 0.0) { B = C; }
+${pressureBoundaryClamp}
         vec2 velocity = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
         gl_FragColor = vec4(velocity, 0.0, 1.0);
       }`);
