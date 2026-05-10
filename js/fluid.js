@@ -348,22 +348,22 @@ export class FluidSimulation {
       }`);
 
     const pressureBoundaryClamp = `
-        float C = texture2D(uPressure, vUv).x;
-        if (vL.x < 0.0) { L = C; }
-        if (vR.x > 1.0) { R = C; }
-        if (vT.y > 1.0) { T = C; }
-        if (vB.y < 0.0) { B = C; }`;
+        float centerPressure = texture2D(uPressure, vUv).x;
+        if (vL.x < 0.0) { leftPressure = centerPressure; }
+        if (vR.x > 1.0) { rightPressure = centerPressure; }
+        if (vT.y > 1.0) { topPressure = centerPressure; }
+        if (vB.y < 0.0) { bottomPressure = centerPressure; }`;
 
     const pressureShader = this._compileShader(gl.FRAGMENT_SHADER, `
       precision mediump float; precision mediump sampler2D;
       varying highp vec2 vUv; varying highp vec2 vL; varying highp vec2 vR; varying highp vec2 vT; varying highp vec2 vB;
       uniform sampler2D uPressure; uniform sampler2D uDivergence;
       void main () {
-        float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
-        float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
+        float leftPressure = texture2D(uPressure, vL).x; float rightPressure = texture2D(uPressure, vR).x;
+        float topPressure = texture2D(uPressure, vT).x; float bottomPressure = texture2D(uPressure, vB).x;
 ${pressureBoundaryClamp}
         float divergence = texture2D(uDivergence, vUv).x;
-        gl_FragColor = vec4((L + R + B + T - divergence) * 0.25, 0.0, 0.0, 1.0);
+        gl_FragColor = vec4((leftPressure + rightPressure + bottomPressure + topPressure - divergence) * 0.25, 0.0, 0.0, 1.0);
       }`);
 
     const gradientSubtractShader = this._compileShader(gl.FRAGMENT_SHADER, `
@@ -371,10 +371,10 @@ ${pressureBoundaryClamp}
       varying highp vec2 vUv; varying highp vec2 vL; varying highp vec2 vR; varying highp vec2 vT; varying highp vec2 vB;
       uniform sampler2D uPressure; uniform sampler2D uVelocity;
       void main () {
-        float L = texture2D(uPressure, vL).x; float R = texture2D(uPressure, vR).x;
-        float T = texture2D(uPressure, vT).x; float B = texture2D(uPressure, vB).x;
+        float leftPressure = texture2D(uPressure, vL).x; float rightPressure = texture2D(uPressure, vR).x;
+        float topPressure = texture2D(uPressure, vT).x; float bottomPressure = texture2D(uPressure, vB).x;
 ${pressureBoundaryClamp}
-        vec2 velocity = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
+        vec2 velocity = texture2D(uVelocity, vUv).xy - vec2(rightPressure - leftPressure, topPressure - bottomPressure);
         gl_FragColor = vec4(velocity, 0.0, 1.0);
       }`);
 
