@@ -292,13 +292,11 @@ function frame (now) {
 
   // — Fluid splats + fixed-timestep sim —
   if (fluid && fluidOn) {
-    const color = settings.get('noteColor');
-    const [r, g, b] = hexToRgb(color);
     const fluidRadius = settings.get('fluidRadius');
+    const tightness = settings.get('fluidTightness') / 100;
+    const dyeRadiusScale = 1 - tightness * 0.75;
+    const fluidColorMode = settings.get('fluidColorMode');
     const fluidSource = settings.get('fluidSource');
-    const dr = r * intensity * SIM_FIXED_DT;
-    const dg = g * intensity * SIM_FIXED_DT;
-    const db = b * intensity * SIM_FIXED_DT;
     // Upward velocity recreates the rising-stream visual from before flow-speed
     // was added. At this scale the steady-state reaches the vorticity clamp
     // (~1000), matching the original dynamics. velX stays 0 to avoid lateral drift.
@@ -312,12 +310,17 @@ function frame (now) {
     while (simAccumulator >= SIM_FIXED_DT && steps < SIM_MAX_STEPS) {
       for (const t of highway.activeTrails()) {
         const normX  = (t.x + t.width / 2) / W;
-        const radius = Math.max(0.005, (t.width / W) * fluidRadius);
+        const velocityRadius = Math.max(0.005, (t.width / W) * fluidRadius);
+        const dyeRadius = Math.max(0.002, velocityRadius * dyeRadiusScale);
+        const [r, g, b] = getFluidColorForNote(t.note, fluidColorMode);
+        const dr = r * intensity * SIM_FIXED_DT;
+        const dg = g * intensity * SIM_FIXED_DT;
+        const db = b * intensity * SIM_FIXED_DT;
         if (fluidSource === 'head' || fluidSource === 'both') {
-          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, velY, dr, dg, db, radius);
+          fluid.addSplat(normX, ((H - kh) - t.topY) / H, 0, velY, dr, dg, db, velocityRadius, dyeRadius);
         }
         if (fluidSource === 'base' || fluidSource === 'both') {
-          fluid.addSplat(normX, (H - kh) / H, 0, velY, dr, dg, db, radius);
+          fluid.addSplat(normX, (H - kh) / H, 0, velY, dr, dg, db, velocityRadius, dyeRadius);
         }
       }
       fluid.step(SIM_FIXED_DT);
@@ -354,6 +357,36 @@ function frame (now) {
 function hexToRgb (hex) {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16 & 0xff) / 255, (n >> 8 & 0xff) / 255, (n & 0xff) / 255];
+}
+
+function getFluidColorForNote (note, mode) {
+  if (mode === 'perNote') return noteToRgb(note);
+  return hexToRgb(settings.get('fluidColor'));
+}
+
+function noteToRgb (note) {
+  const hue = ((note % 12) / 12) * 360;
+  return hslToRgb(hue / 360, 0.95, 0.62);
+}
+
+function hslToRgb (h, s, l) {
+  if (s === 0) return [l, l, l];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [
+    hueToChannel(p, q, h + 1 / 3),
+    hueToChannel(p, q, h),
+    hueToChannel(p, q, h - 1 / 3),
+  ];
+}
+
+function hueToChannel (p, q, t) {
+  if (t < 0) t += 1;
+  if (t > 1) t -= 1;
+  if (t < 1 / 6) return p + (q - p) * 6 * t;
+  if (t < 1 / 2) return q;
+  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+  return p;
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────

@@ -8,7 +8,10 @@ const DEFAULTS = {
   noteWidth: 16,
   fluidEnabled: true,
   fluidIntensity: 95,
+  fluidColor: '#4bc0ff',
+  fluidColorMode: 'solid',
   fluidRadius: 1.2,
+  fluidTightness: 65,
   fluidSpeed: 10,
   fluidSource: 'base',
   monophonic: false,
@@ -79,7 +82,10 @@ export function bindSettingsUI (settings, onChange) {
   wire('note-width',            'noteWidth',          v => Number(v));
   wire('fluid-enabled',         'fluidEnabled');
   wire('fluid-intensity',       'fluidIntensity',     v => Number(v));
+  wire('fluid-color',           'fluidColor');
+  wire('fluid-color-mode',      'fluidColorMode');
   wire('fluid-radius',          'fluidRadius',        v => Number(v));
+  wire('fluid-tightness',       'fluidTightness',     v => Number(v));
   wire('fluid-speed',           'fluidSpeed',         v => Number(v));
   wire('fluid-source',          'fluidSource');
   wire('monophonic',            'monophonic');
@@ -92,6 +98,7 @@ export function bindSettingsUI (settings, onChange) {
 
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
+  if (id === 'fluid-tightness') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
