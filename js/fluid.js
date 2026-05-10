@@ -348,11 +348,14 @@ export class FluidSimulation {
       }`);
 
     const pressureBoundaryClamp = `
-        float centerPressure = texture2D(uPressure, vUv).x;
-        if (vL.x < 0.0) { leftPressure = centerPressure; }
-        if (vR.x > 1.0) { rightPressure = centerPressure; }
-        if (vT.y > 1.0) { topPressure = centerPressure; }
-        if (vB.y < 0.0) { bottomPressure = centerPressure; }`;
+        bool needsBoundaryClamp = vL.x < 0.0 || vR.x > 1.0 || vT.y > 1.0 || vB.y < 0.0;
+        if (needsBoundaryClamp) {
+          float centerPressure = texture2D(uPressure, vUv).x;
+          if (vL.x < 0.0) { leftPressure = centerPressure; }
+          if (vR.x > 1.0) { rightPressure = centerPressure; }
+          if (vT.y > 1.0) { topPressure = centerPressure; }
+          if (vB.y < 0.0) { bottomPressure = centerPressure; }
+        }`;
 
     const pressureShader = this._compileShader(gl.FRAGMENT_SHADER, `
       precision mediump float; precision mediump sampler2D;
