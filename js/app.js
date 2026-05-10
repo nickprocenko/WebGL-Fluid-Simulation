@@ -22,6 +22,8 @@ let lastTime = performance.now();
 let simAccumulator = 0;
 const SIM_FIXED_DT  = 1 / 60; // physics step size — never changes, preserves eddy character
 const SIM_MAX_STEPS = 8;       // safety cap per real frame
+const MAX_DYE_TIGHTNESS_REDUCTION = 0.75;
+const MIN_DYE_RADIUS = 0.002;
 let noteColorMap = {}; // note -> hex color (for per-note colors in future)
 const pointerToNote = new Map();
 const noteTouchCount = new Map();
@@ -294,7 +296,9 @@ function frame (now) {
   if (fluid && fluidOn) {
     const fluidRadius = settings.get('fluidRadius');
     const tightness = settings.get('fluidTightness') / 100;
-    const dyeRadiusScale = 1 - tightness * 0.75;
+    // Tightness only constrains dye spread; velocity radius stays unchanged to
+    // preserve the original vortex/flow dynamics.
+    const dyeRadiusScale = 1 - tightness * MAX_DYE_TIGHTNESS_REDUCTION;
     const fluidColorMode = settings.get('fluidColorMode');
     const fluidSource = settings.get('fluidSource');
     // Upward velocity recreates the rising-stream visual from before flow-speed
@@ -311,7 +315,9 @@ function frame (now) {
       for (const t of highway.activeTrails()) {
         const normX  = (t.x + t.width / 2) / W;
         const velocityRadius = Math.max(0.005, (t.width / W) * fluidRadius);
-        const dyeRadius = Math.max(0.002, velocityRadius * dyeRadiusScale);
+        // Dye can go smaller than velocity splats so the visual stays attached
+        // to the played note without changing fluid momentum injection.
+        const dyeRadius = Math.max(MIN_DYE_RADIUS, velocityRadius * dyeRadiusScale);
         const [r, g, b] = getFluidColorForNote(t.note, fluidColorMode);
         const dr = r * intensity * SIM_FIXED_DT;
         const dg = g * intensity * SIM_FIXED_DT;
