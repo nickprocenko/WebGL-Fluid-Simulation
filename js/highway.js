@@ -42,13 +42,13 @@ export class Highway {
     });
   }
 
-  draw (ctx, canvasHeight, keyboardHeight) {
+  draw (ctx, canvasHeight, keyboardHeight, appearance = {}) {
     const base = canvasHeight - keyboardHeight;
 
     // Draw finished (released) trails
-    for (const t of this._finished) this._drawTrail(ctx, t, base);
+    for (const t of this._finished) this._drawTrail(ctx, t, base, appearance);
     // Draw active (held) trails on top
-    for (const t of this._trails.values()) this._drawTrail(ctx, t, base);
+    for (const t of this._trails.values()) this._drawTrail(ctx, t, base, appearance);
   }
 
   recolor (getColor) {
@@ -56,26 +56,37 @@ export class Highway {
     for (const t of this._finished) t.color = getColor(t.note);
   }
 
-  _drawTrail (ctx, t, base) {
+  _drawTrail (ctx, t, base, appearance) {
     const h = t.topY - (t.released ? t.bottomY : 0);
     if (h <= 0) return;
     const yBottom = t.released ? base - t.bottomY : base;
     const yTop    = base - t.topY;
+    const glow = Math.max(0, Math.min(1, appearance.glow ?? 0.35));
+    const innerOpacity = Math.max(0, Math.min(1, appearance.innerOpacity ?? 0.85));
+    const headOpacity = Math.max(0, Math.min(1, appearance.headOpacity ?? 0.9));
+    const outerWidth = t.width * (1.2 + glow * 1.2);
+    const midWidth = t.width * (1.0 + glow * 0.6);
+    const outerX = t.x - (outerWidth - t.width) / 2;
+    const midX = t.x - (midWidth - t.width) / 2;
 
-    // Glow effect: wider, semi-transparent under layer
-    ctx.globalAlpha = 0.25;
+    // Glow effect: two soft under-layers
+    ctx.globalAlpha = 0.08 + glow * 0.28;
     ctx.fillStyle = t.color;
-    ctx.fillRect(t.x - t.width * 0.3, yTop, t.width * 1.6, h);
+    ctx.fillRect(outerX, yTop, outerWidth, h);
+
+    ctx.globalAlpha = 0.12 + glow * 0.3;
+    ctx.fillStyle = t.color;
+    ctx.fillRect(midX, yTop, midWidth, h);
 
     // Solid note body
-    ctx.globalAlpha = 0.85;
+    ctx.globalAlpha = innerOpacity;
     ctx.fillStyle = t.color;
     const r = Math.min(t.width / 2, 6);
     this._roundedRect(ctx, t.x, yTop, t.width, h, r);
     ctx.fill();
 
     // Bright top edge (the "head" — where fluid splat happens)
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = headOpacity;
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(t.x, yTop, t.width, Math.min(3, h));
 

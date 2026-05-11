@@ -277,7 +277,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 bindSettingsUI(settings, (key, val) => {
   if (key === 'keyboardHeight') { resize(); return; }
   if (key === 'showKeyboard' && !val) releaseAllPointerNotes();
-  if (key === 'noteColor' || key === 'fluidColorMode') refreshActiveNoteColors();
+  if (key === 'noteColor' || key === 'noteColorMode' || key === 'noteBrightness') refreshActiveNoteColors();
   if (key === 'densityDissipation' && fluid) fluid.updateConfig({ DENSITY_DISSIPATION: val });
   if (key === 'velocityDissipation' && fluid) fluid.updateConfig({ VELOCITY_DISSIPATION: val });
   if (key === 'curl' && fluid) fluid.updateConfig({ CURL: val });
@@ -355,7 +355,7 @@ function frame (now) {
   highway.update(dt, speed, H, kh);
 
   hCtx.clearRect(0, 0, W, H);
-  highway.draw(hCtx, H, kh);
+  highway.draw(hCtx, H, kh, getNoteAppearance());
 
   // — Piano keyboard —
   if (settings.get('showKeyboard')) {
@@ -384,8 +384,10 @@ function toHex (channel) {
 }
 
 function getNoteVisualColor (note) {
-  if (settings.get('fluidColorMode') === 'perNote') return rgbToHex(noteToRgb(note));
-  return settings.get('noteColor');
+  const mode = settings.get('noteColorMode');
+  const brightness = settings.get('noteBrightness') / 100;
+  const rgb = getNoteRgbByMode(note, mode);
+  return rgbToHex(applyBrightness(rgb, brightness));
 }
 
 function refreshActiveNoteColors () {
@@ -399,6 +401,68 @@ function refreshActiveNoteColors () {
 function getFluidColorForNote (note, mode) {
   if (mode === 'perNote') return noteToRgb(note);
   return hexToRgb(settings.get('fluidColor'));
+}
+
+function getNoteAppearance () {
+  return {
+    glow: settings.get('noteGlow') / 100,
+    innerOpacity: settings.get('noteInnerOpacity') / 100,
+    headOpacity: settings.get('noteHeadOpacity') / 100,
+  };
+}
+
+function getNoteRgbByMode (note, mode) {
+  if (mode === 'rainbow') return noteToRgb(note);
+  const t = (note % 12) / 11;
+  if (mode === 'fire') {
+    return gradientRgb(t, [
+      [1.0, 0.25, 0.05],
+      [1.0, 0.58, 0.08],
+      [1.0, 0.92, 0.28],
+    ]);
+  }
+  if (mode === 'water') {
+    return gradientRgb(t, [
+      [0.05, 0.35, 0.95],
+      [0.06, 0.75, 1.0],
+      [0.45, 0.95, 1.0],
+    ]);
+  }
+  if (mode === 'sunset') {
+    return gradientRgb(t, [
+      [0.98, 0.26, 0.46],
+      [1.0, 0.45, 0.2],
+      [0.98, 0.82, 0.3],
+    ]);
+  }
+  if (mode === 'neon') {
+    return gradientRgb(t, [
+      [0.2, 1.0, 0.75],
+      [0.45, 0.72, 1.0],
+      [1.0, 0.28, 0.92],
+    ]);
+  }
+  return hexToRgb(settings.get('noteColor'));
+}
+
+function gradientRgb (t, stops) {
+  const clamped = Math.max(0, Math.min(1, t));
+  const segLen = 1 / (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(clamped / segLen));
+  const localT = (clamped - i * segLen) / segLen;
+  return blendRgb(stops[i], stops[i + 1], localT);
+}
+
+function blendRgb (a, b, t) {
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t,
+  ];
+}
+
+function applyBrightness (rgb, scale) {
+  return rgb.map(v => Math.max(0, Math.min(1, v * scale)));
 }
 
 function noteToRgb (note) {

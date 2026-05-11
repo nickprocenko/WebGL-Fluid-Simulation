@@ -33,6 +33,37 @@
           <input type="color" id="note-color" value="#00e5ff">
         </label>
         <label>
+          Note colour mode
+          <select id="note-color-mode">
+            <option value="solid" selected>Solid</option>
+            <option value="rainbow">Rainbow</option>
+            <option value="fire">Fire</option>
+            <option value="water">Water</option>
+            <option value="sunset">Sunset</option>
+            <option value="neon">Neon</option>
+          </select>
+        </label>
+        <label>
+          Note brightness
+          <input type="range" id="note-brightness" min="20" max="200" step="5" value="100">
+          <span id="note-brightness-val">100%</span>
+        </label>
+        <label>
+          Note glow
+          <input type="range" id="note-glow" min="0" max="100" step="1" value="35">
+          <span id="note-glow-val">35%</span>
+        </label>
+        <label>
+          Inner opacity
+          <input type="range" id="note-inner-opacity" min="20" max="100" step="1" value="85">
+          <span id="note-inner-opacity-val">85%</span>
+        </label>
+        <label>
+          Head highlight
+          <input type="range" id="note-head-opacity" min="0" max="100" step="1" value="90">
+          <span id="note-head-opacity-val">90%</span>
+        </label>
+        <label>
           Speed (px/s)
           <input type="range" id="speed" min="50" max="800" step="10" value="260">
           <span id="speed-val">260</span>

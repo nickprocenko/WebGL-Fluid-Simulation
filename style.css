@@ -193,6 +193,16 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
+select {
+  flex: 1;
+  min-width: 120px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #eee;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
 #midi-inputs-list {
   font-size: 12px;
   opacity: 0.7;
