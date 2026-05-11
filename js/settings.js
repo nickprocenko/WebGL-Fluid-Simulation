@@ -4,6 +4,11 @@ const KEY = 'piano-viz-settings';
 
 const DEFAULTS = {
   noteColor: '#00e5ff',
+  noteColorMode: 'solid',
+  noteBrightness: 100,
+  noteGlow: 35,
+  noteInnerOpacity: 85,
+  noteHeadOpacity: 90,
   speed: 260,
   noteWidth: 16,
   fluidEnabled: true,
@@ -82,6 +87,11 @@ export function bindSettingsUI (settings, onChange) {
   }
 
   wire('note-color',            'noteColor');
+  wire('note-color-mode',       'noteColorMode');
+  wire('note-brightness',       'noteBrightness',     v => Number(v));
+  wire('note-glow',             'noteGlow',           v => Number(v));
+  wire('note-inner-opacity',    'noteInnerOpacity',   v => Number(v));
+  wire('note-head-opacity',     'noteHeadOpacity',    v => Number(v));
   wire('speed',                 'speed',              v => Number(v));
   wire('note-width',            'noteWidth',          v => Number(v));
   wire('fluid-enabled',         'fluidEnabled');
@@ -106,6 +116,10 @@ export function bindSettingsUI (settings, onChange) {
 
 function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
+  if (id === 'note-brightness') return Math.round(val) + '%';
+  if (id === 'note-glow') return Math.round(val) + '%';
+  if (id === 'note-inner-opacity') return Math.round(val) + '%';
+  if (id === 'note-head-opacity') return Math.round(val) + '%';
   if (id === 'fluid-tightness') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
