@@ -51,6 +51,11 @@ export class Highway {
     for (const t of this._trails.values()) this._drawTrail(ctx, t, base);
   }
 
+  recolor (getColor) {
+    for (const t of this._trails.values()) t.color = getColor(t.note);
+    for (const t of this._finished) t.color = getColor(t.note);
+  }
+
   _drawTrail (ctx, t, base) {
     const h = t.topY - (t.released ? t.bottomY : 0);
     if (h <= 0) return;

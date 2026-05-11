@@ -108,7 +108,7 @@ function handleNoteOn (note, velocity) {
     }
   }
   const W = fluidCanvas.width;
-  const color = settings.get('noteColor');
+  const color = getNoteVisualColor(note);
   const nw = noteWidth(note, W) * (settings.get('noteWidth') / 12);
   const cx = noteCenterX(note, W) - nw / 2;
   noteColorMap[note] = color;
@@ -277,6 +277,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 bindSettingsUI(settings, (key, val) => {
   if (key === 'keyboardHeight') { resize(); return; }
   if (key === 'showKeyboard' && !val) releaseAllPointerNotes();
+  if (key === 'noteColor' || key === 'fluidColorMode') refreshActiveNoteColors();
   if (key === 'densityDissipation' && fluid) fluid.updateConfig({ DENSITY_DISSIPATION: val });
   if (key === 'velocityDissipation' && fluid) fluid.updateConfig({ VELOCITY_DISSIPATION: val });
   if (key === 'curl' && fluid) fluid.updateConfig({ CURL: val });
@@ -371,6 +372,28 @@ function frame (now) {
 function hexToRgb (hex) {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16 & 0xff) / 255, (n >> 8 & 0xff) / 255, (n & 0xff) / 255];
+}
+
+function rgbToHex (rgb) {
+  const [r, g, b] = rgb.map(v => Math.max(0, Math.min(255, Math.round(v * 255))));
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function toHex (channel) {
+  return channel.toString(16).padStart(2, '0');
+}
+
+function getNoteVisualColor (note) {
+  if (settings.get('fluidColorMode') === 'perNote') return rgbToHex(noteToRgb(note));
+  return settings.get('noteColor');
+}
+
+function refreshActiveNoteColors () {
+  highway.recolor(getNoteVisualColor);
+  noteColorMap = {};
+  for (const trail of highway.activeTrails()) {
+    noteColorMap[trail.note] = trail.color;
+  }
 }
 
 function getFluidColorForNote (note, mode) {
