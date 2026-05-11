@@ -277,7 +277,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 bindSettingsUI(settings, (key, val) => {
   if (key === 'keyboardHeight') { resize(); return; }
   if (key === 'showKeyboard' && !val) releaseAllPointerNotes();
-  if (['noteColor', 'noteColorMode', 'noteBrightness'].includes(key)) refreshActiveNoteColors();
+  if (['noteColor', 'noteColorMode', 'noteBrightness', 'fluidColorMode'].includes(key)) refreshActiveNoteColors();
   if (key === 'densityDissipation' && fluid) fluid.updateConfig({ DENSITY_DISSIPATION: val });
   if (key === 'velocityDissipation' && fluid) fluid.updateConfig({ VELOCITY_DISSIPATION: val });
   if (key === 'curl' && fluid) fluid.updateConfig({ CURL: val });

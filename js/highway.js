@@ -1,5 +1,11 @@
 // Note trail (highway) renderer
 
+const DEFAULT_APPEARANCE = {
+  glow: 0.35,
+  innerOpacity: 0.85,
+  headOpacity: 0.9,
+};
+
 export class Highway {
   constructor () {
     this._trails = new Map(); // note -> trail object
@@ -61,9 +67,9 @@ export class Highway {
     if (h <= 0) return;
     const yBottom = t.released ? base - t.bottomY : base;
     const yTop    = base - t.topY;
-    const glow = this._clamp01(appearance.glow ?? 0.35);
-    const innerOpacity = this._clamp01(appearance.innerOpacity ?? 0.85);
-    const headOpacity = this._clamp01(appearance.headOpacity ?? 0.9);
+    const glow = this._clamp01(appearance.glow ?? DEFAULT_APPEARANCE.glow);
+    const innerOpacity = this._clamp01(appearance.innerOpacity ?? DEFAULT_APPEARANCE.innerOpacity);
+    const headOpacity = this._clamp01(appearance.headOpacity ?? DEFAULT_APPEARANCE.headOpacity);
     const outerWidth = t.width * (1.2 + glow * 1.2);
     const midWidth = t.width * (1.0 + glow * 0.6);
     const outerX = t.x - (outerWidth - t.width) / 2;
