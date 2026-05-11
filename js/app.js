@@ -76,6 +76,10 @@ function initFluid () {
       PRESSURE: 0.8,
       PRESSURE_ITERATIONS: 20,
       CURL: settings.get('curl'),
+      BLOOM: settings.get('fluidBloom'),
+      BLOOM_INTENSITY: settings.get('fluidBloomIntensity'),
+      SUNRAYS: settings.get('fluidSunrays'),
+      SUNRAYS_WEIGHT: settings.get('fluidSunraysWeight'),
     });
   } catch (e) {
     console.warn('WebGL fluid init failed:', e);
@@ -276,6 +280,10 @@ bindSettingsUI(settings, (key, val) => {
   if (key === 'densityDissipation' && fluid) fluid.updateConfig({ DENSITY_DISSIPATION: val });
   if (key === 'velocityDissipation' && fluid) fluid.updateConfig({ VELOCITY_DISSIPATION: val });
   if (key === 'curl' && fluid) fluid.updateConfig({ CURL: val });
+  if (key === 'fluidBloom' && fluid) fluid.updateConfig({ BLOOM: val });
+  if (key === 'fluidBloomIntensity' && fluid) fluid.updateConfig({ BLOOM_INTENSITY: val });
+  if (key === 'fluidSunrays' && fluid) fluid.updateConfig({ SUNRAYS: val });
+  if (key === 'fluidSunraysWeight' && fluid) fluid.updateConfig({ SUNRAYS_WEIGHT: val });
 });
 
 // ── Main loop ─────────────────────────────────────────────────────────────
