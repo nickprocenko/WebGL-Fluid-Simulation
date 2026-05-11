@@ -61,9 +61,9 @@ export class Highway {
     if (h <= 0) return;
     const yBottom = t.released ? base - t.bottomY : base;
     const yTop    = base - t.topY;
-    const glow = Math.max(0, Math.min(1, appearance.glow ?? 0.35));
-    const innerOpacity = Math.max(0, Math.min(1, appearance.innerOpacity ?? 0.85));
-    const headOpacity = Math.max(0, Math.min(1, appearance.headOpacity ?? 0.9));
+    const glow = this._clamp01(appearance.glow ?? 0.35);
+    const innerOpacity = this._clamp01(appearance.innerOpacity ?? 0.85);
+    const headOpacity = this._clamp01(appearance.headOpacity ?? 0.9);
     const outerWidth = t.width * (1.2 + glow * 1.2);
     const midWidth = t.width * (1.0 + glow * 0.6);
     const outerX = t.x - (outerWidth - t.width) / 2;
@@ -103,6 +103,10 @@ export class Highway {
     ctx.lineTo(x, y + r);
     ctx.quadraticCurveTo(x, y, x + r, y);
     ctx.closePath();
+  }
+
+  _clamp01 (v) {
+    return Math.max(0, Math.min(1, v));
   }
 
   // Yield active trail positions for fluid splat injection

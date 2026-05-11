@@ -118,7 +118,8 @@ function _formatVal (id, val) {
   if (id === 'fluid-intensity') return Math.round(val) + '%';
   if (id === 'note-brightness') return Math.round(val) + '%';
   if (id === 'note-glow') return Math.round(val) + '%';
-  if (id === 'note-inner-opacity' || id === 'note-head-opacity') return Math.round(val) + '%';
+  if (id === 'note-inner-opacity') return Math.round(val) + '%';
+  if (id === 'note-head-opacity') return Math.round(val) + '%';
   if (id === 'fluid-tightness') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
