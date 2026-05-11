@@ -13,6 +13,10 @@ const DEFAULTS = {
   fluidRadius: 1.2,
   fluidTightness: 65,
   fluidSpeed: 10,
+  fluidBloom: true,
+  fluidBloomIntensity: 0.8,
+  fluidSunrays: true,
+  fluidSunraysWeight: 0.85,
   fluidSource: 'base',
   monophonic: false,
   densityDissipation: 2.2,
@@ -87,6 +91,10 @@ export function bindSettingsUI (settings, onChange) {
   wire('fluid-radius',          'fluidRadius',        v => Number(v));
   wire('fluid-tightness',       'fluidTightness',     v => Number(v));
   wire('fluid-speed',           'fluidSpeed',         v => Number(v));
+  wire('fluid-bloom',           'fluidBloom');
+  wire('fluid-bloom-intensity', 'fluidBloomIntensity',v => Number(v) / 100);
+  wire('fluid-sunrays',         'fluidSunrays');
+  wire('fluid-sunrays-weight',  'fluidSunraysWeight', v => Number(v) / 100);
   wire('fluid-source',          'fluidSource');
   wire('monophonic',            'monophonic');
   wire('density-dissipation',   'densityDissipation', v => Number(v) / 10);
@@ -101,6 +109,8 @@ function _formatVal (id, val) {
   if (id === 'fluid-tightness') return Math.round(val) + '%';
   if (id === 'fluid-radius') return Number(val).toFixed(1);
   if (id === 'fluid-speed') return (Number(val) / 10).toFixed(1) + '×';
+  if (id === 'fluid-bloom-intensity') return Number(val).toFixed(1);
+  if (id === 'fluid-sunrays-weight') return Number(val).toFixed(2);
   if (id === 'density-dissipation' || id === 'velocity-dissipation') return val.toFixed(1);
   return val;
 }
