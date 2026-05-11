@@ -85,10 +85,10 @@ export class FluidSimulation {
       this.pressure.swap();
     }
 
-    this.gradienSubtractProgram.bind();
-    gl.uniform2f(this.gradienSubtractProgram.uniforms.texelSize, this.velocity.texelSizeX, this.velocity.texelSizeY);
-    gl.uniform1i(this.gradienSubtractProgram.uniforms.uPressure, this.pressure.read.attach(0));
-    gl.uniform1i(this.gradienSubtractProgram.uniforms.uVelocity, this.velocity.read.attach(1));
+    this.gradientSubtractProgram.bind();
+    gl.uniform2f(this.gradientSubtractProgram.uniforms.texelSize, this.velocity.texelSizeX, this.velocity.texelSizeY);
+    gl.uniform1i(this.gradientSubtractProgram.uniforms.uPressure, this.pressure.read.attach(0));
+    gl.uniform1i(this.gradientSubtractProgram.uniforms.uVelocity, this.velocity.read.attach(1));
     this._blit(this.velocity.write);
     this.velocity.swap();
 
@@ -115,7 +115,9 @@ export class FluidSimulation {
 
   render () {
     const { gl, config } = this;
-    if (config.BLOOM) this._applyBloom(this.dye.read, this.bloom);
+    if (config.BLOOM) {
+      this._applyBloom(this.dye.read, this.bloom);
+    }
     if (config.SUNRAYS) {
       this._applySunrays(this.dye.read, this.dye.write, this.sunrays);
       this._blur(this.sunrays, this.sunraysTemp, 1);
@@ -570,7 +572,7 @@ ${pressureBoundaryClamp}
     this.curlProgram           = new _Program(gl, this._baseVertexShader, curlShader);
     this.vorticityProgram      = new _Program(gl, this._baseVertexShader, vorticityShader);
     this.pressureProgram       = new _Program(gl, this._baseVertexShader, pressureShader);
-    this.gradienSubtractProgram = new _Program(gl, this._baseVertexShader, gradientSubtractShader);
+    this.gradientSubtractProgram = new _Program(gl, this._baseVertexShader, gradientSubtractShader);
     this.ditheringTexture = this._createTextureAsync('LDR_LLL1_0.png');
     this.displayMaterial = new _Material(gl, this._baseVertexShader, displayShaderSource, this);
   }

@@ -92,7 +92,7 @@ export function bindSettingsUI (settings, onChange) {
   wire('fluid-tightness',       'fluidTightness',     v => Number(v));
   wire('fluid-speed',           'fluidSpeed',         v => Number(v));
   wire('fluid-bloom',           'fluidBloom');
-  wire('fluid-bloom-intensity', 'fluidBloomIntensity',v => Number(v) / 100);
+  wire('fluid-bloom-intensity', 'fluidBloomIntensity', v => Number(v) / 100);
   wire('fluid-sunrays',         'fluidSunrays');
   wire('fluid-sunrays-weight',  'fluidSunraysWeight', v => Number(v) / 100);
   wire('fluid-source',          'fluidSource');
