@@ -413,7 +413,7 @@ function getNoteAppearance () {
 
 function getNoteRgbByMode (note, mode) {
   if (mode === 'rainbow') return noteToRgb(note);
-  const t = (note % 12) / 11;
+  const t = (note % 12) / 12;
   if (mode === 'fire') {
     return gradientRgb(t, [
       [1.0, 0.25, 0.05],
